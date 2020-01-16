@@ -19,24 +19,47 @@ export default class Home extends Component {
       //initialize the counter duration
       this.state = {
         totalDuration: 0,
+        expirydate: ""
       };
    
     }
   
   componentDidMount() {
-    var that = this;
-    var date = moment()
-      .utcOffset('+07:00')
-       .format('YYYY-MM-DD HH:mm:ss');
 
-    var expirydate = '2020-01-25 00:00:00';
-    var diffr = moment.duration(moment(expirydate).diff(moment(date)));
-      
-    var hours = parseInt(diffr.asHours());
-    var minutes = parseInt(diffr.minutes());
-    var seconds = parseInt(diffr.seconds());
-    var d = hours * 60 * 60 + minutes * 60 + seconds;
-      
+    this.setTime(this.state.expirydate)
+  }
+  
+  _setExpiryDate(expirydate){
+    this.setState({expirydate:expirydate})
+    console.warn(expirydate.slice(0,4))
+    this.setTime(expirydate)
+  }
+
+  setTime = (expirydate) => {
+    let exDate = "";
+    let d = 0
+    try {
+      var that = this;
+      var date = moment()
+        .utcOffset('+07:00')
+        .format('YYYY-MM-DD HH:mm:ss');
+
+      exDate = expirydate;
+      var diffr = moment.duration(moment(exDate).diff(moment(date)));
+        
+      var hours = parseInt(diffr.asHours());
+      var minutes = parseInt(diffr.minutes());
+      var seconds = parseInt(diffr.seconds());
+
+      if(exDate=="") {
+        d = 0
+      } else {
+        d = hours * 60 * 60 + minutes * 60 + seconds;
+      }
+    } catch (error) {
+      console.warn(error)
+      d = 0
+    }    
     that.setState({ totalDuration: d});
   }
 
@@ -50,7 +73,10 @@ export default class Home extends Component {
              style={styles.container}>
              <View style={{flex:1, width:'100%'}}>
                 <TouchableOpacity
-                    onPress={() => navigate('EditTime', {name: 'Jane'})}
+                    onPress={() => navigate('EditTime', {
+                      setExpiryDate: this._setExpiryDate.bind(this),
+                      time: this.state.expirydate
+                    })}
                     style={{width: 30, height: 30, marginTop:20,marginRight:20, position: 'absolute', right:0}}>
                     <Image
                     style={{width: 30, height: 30,  position: 'absolute', right:0}}

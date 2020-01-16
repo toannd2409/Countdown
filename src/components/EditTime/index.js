@@ -6,7 +6,8 @@ import {
   StyleSheet,
   TextInput,
   ScrollView,
-  StatusBar
+  StatusBar,
+  TouchableOpacity
 } from 'react-native';
 import DatePicker from 'react-native-datepicker';
 import moment from 'moment';
@@ -36,9 +37,18 @@ export default class EditTime extends Component {
     this.getTimePicker()    
   }
 
+  goBack = () => {
+    this.props.navigation.state.params.setExpiryDate("2020-01-18 00:00:00")
+    this.props.navigation.goBack()
+  }
+
   getTime(){
     var d = moment().utcOffset('+07:00').format('YYYY-MM-DD');
+    let getDate = this.props.navigation.state.params.time
+    if(getDate == "")
     this.setState({date: d})
+    else
+    this.setState({date: getDate})
   }
   
   getTimePicker(){
@@ -85,18 +95,16 @@ export default class EditTime extends Component {
             confirmBtnText="Confirm"
             cancelBtnText="Cancel"
             customStyles={{
-              dateIcon: {
-                display: 'none'
-              },
               dateInput: {
-                borderRadius: 50
+                borderRadius: 5,
+                borderColor: '#aaaaaa'
               },
               dateText: {
                 fontSize: 18
               }
               // ... You can check the source to find the other keys.
             }}
-            onDateChange={(date) => {this.setState({date: date});console.log("date: " +date)}} />
+            onDateChange={(date) => {this.setState({date: date})}} />
             
             <View style={styles.viewTime}>
               <View style={{justifyContent:'center'}}>
@@ -144,6 +152,7 @@ export default class EditTime extends Component {
             </View>
           </View>
 
+          <View style={{height:1, backgroundColor: '#bababa', margin: 10}}/>
           <Text style={styles.textTitle}>Countdown title</Text>
           <View style={styles.subContainer}>
             <TextInput 
@@ -151,6 +160,11 @@ export default class EditTime extends Component {
             placeholder = 'Event name...'
             />
           </View>
+          <TouchableOpacity
+            style={styles.button}
+            onPress = {() => this.goBack()}>
+            <Text style={{color:"#FFF"}}> Done </Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     );
@@ -158,16 +172,26 @@ export default class EditTime extends Component {
 }
 
 const styles =  StyleSheet.create({
+  button: {
+    alignItems: 'center',
+    alignSelf: 'center',
+    width: 150,
+    backgroundColor: '#15a6ea',
+    padding: 10,
+    borderColor: '#0895d8',
+    borderWidth: 1,
+    borderRadius: 50,
+    marginTop: 50
+  },
   textTitle: {
     fontSize: 16,
-    marginBottom: 10,
-    marginTop: 20,
-    color: 'black',
-    fontWeight: 'bold'
+    margin: 10,
+    marginBottom: 20,
+    color: '#969696',
   },
   subContainer: {
-    paddingStart: 20,
-    paddingEnd: 20
+    paddingStart: 10,
+    paddingEnd: 10
   },
   datePicker: {
     width: '100%', 
@@ -175,13 +199,14 @@ const styles =  StyleSheet.create({
     justifyContent:'center',
   },
   viewTime: {
+    width: '100%',
     flexDirection:'row', 
-    alignContent:'center'
+    alignContent:'center',
+    justifyContent: 'space-between'
   },
   pickerTime: {
     height: 50, 
-    width: 120, 
-    left: 50
+    width: 150, 
   },
   textTime: {
     width: 80,
@@ -190,7 +215,7 @@ const styles =  StyleSheet.create({
   textInputEvent: {
     width: '100%',
     borderWidth: 1,
-    borderRadius: 10,
+    borderRadius: 8,
     borderColor: 'gray',
     padding: 5,
     paddingStart: 10
