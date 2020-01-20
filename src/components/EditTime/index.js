@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import DatePicker from 'react-native-datepicker';
 import moment from 'moment';
+import AsyncStorage from '@react-native-community/async-storage';
 
 export default class EditTime extends Component {
 
@@ -23,6 +24,7 @@ export default class EditTime extends Component {
       selectHour: "0",
       selectMinute: "0",
       selectSecond: "0",
+      event: ""
     }
   }
   static navigationOptions = {
@@ -38,17 +40,29 @@ export default class EditTime extends Component {
   }
 
   goBack = () => {
-    this.props.navigation.state.params.setExpiryDate("2020-01-18 00:00:00")
+    let expriDate = this.state.date + " " + this.state.selectHour + ":" +  this.state.selectMinute + ":" + this.state.selectSecond
+    this.props.navigation.state.params.setExpiryDate(expriDate, this.state.event)
+    this._saveKey("EVENT", this.state.event)
+    this._saveKey("DATE_TIME", expriDate)
     this.props.navigation.goBack()
   }
 
   getTime(){
     var d = moment().utcOffset('+07:00').format('YYYY-MM-DD');
     let getDate = this.props.navigation.state.params.time
-    if(getDate == "")
-    this.setState({date: d})
-    else
-    this.setState({date: getDate})
+    let event = this.props.navigation.state.params.event
+    if(getDate == ""){
+      this.setState({date: d})
+    }
+    else {
+      this.setState({
+        date: getDate.slice(0,10),
+        selectHour: getDate.slice(11,13),
+        selectMinute: getDate.slice(14,16),
+        selectSecond: getDate.slice(17,19),
+        event: event })
+        
+    }
   }
   
   getTimePicker(){
@@ -76,6 +90,15 @@ export default class EditTime extends Component {
     this.setState({pickerValueHour})
     this.setState({pickerValueMinute})
   }
+
+  _saveKey = async (key, value) => {
+    try {
+      await AsyncStorage.setItem(key, value);
+    } catch (error) {
+      // Error saving data
+    }
+  }
+
 
   render() {
     
@@ -158,6 +181,8 @@ export default class EditTime extends Component {
             <TextInput 
             style={styles.textInputEvent}
             placeholder = 'Event name...'
+            onChangeText={(text) => this.setState({event: text})}
+            value={this.state.event}
             />
           </View>
           <TouchableOpacity

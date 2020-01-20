@@ -10,6 +10,8 @@ import {
 } from 'react-native';
 import CountDown from 'react-native-countdown-component';
 import moment from 'moment';
+import AsyncStorage from '@react-native-community/async-storage';
+
 export default class Home extends Component {
   static navigationOptions = {
     header: null,
@@ -19,22 +21,42 @@ export default class Home extends Component {
       //initialize the counter duration
       this.state = {
         totalDuration: 0,
-        expirydate: ""
+        expirydate: "",
+        event: "",
       };
    
     }
   
   componentDidMount() {
-
-    this.setTime(this.state.expirydate)
+    // this.setTimeNewYear()
+    this._getValueKey()
   }
   
-  _setExpiryDate(expirydate){
+  _setExpiryDate(expirydate, event){
     this.setState({expirydate:expirydate})
-    console.warn(expirydate.slice(0,4))
+    this.setState({event:event})
     this.setTime(expirydate)
   }
 
+  setTimeNewYear = () => {
+    let exDate = "2020-01-25 00:00:00";
+    let d = 0
+    var date = moment()
+        .utcOffset('+07:00')
+        .format('YYYY-MM-DD HH:mm:ss');
+
+    var diffr = moment.duration(moment(exDate).diff(moment(date)));
+        
+    var hours = parseInt(diffr.asHours());
+    var minutes = parseInt(diffr.minutes());
+    var seconds = parseInt(diffr.seconds());
+    d = hours * 60 * 60 + minutes * 60 + seconds;
+    this.setState({ totalDuration: d});
+
+    if(d <= 0)
+      this.setTime(this.state.expirydate)
+  }
+  
   setTime = (expirydate) => {
     let exDate = "";
     let d = 0
@@ -57,14 +79,50 @@ export default class Home extends Component {
         d = hours * 60 * 60 + minutes * 60 + seconds;
       }
     } catch (error) {
-      console.warn(error)
       d = 0
     }    
     that.setState({ totalDuration: d});
   }
 
+  _getValueKey = async () => {
+    try {
+      const eventValue = await AsyncStorage.getItem('EVENT');
+      const dateValue = await AsyncStorage.getItem('DATE_TIME');
+
+      if(dateValue != null){
+        this.setState({expirydate: dateValue})
+        this.setTime(dateValue)
+      }
+
+      if(eventValue != null)
+      this.setState({event: eventValue})
+
+    } catch (error) {
+      // Error retrieving data
+    }
+  };
+
+  async removeItemValue() {
+    try {
+      await AsyncStorage.removeItem('EVENT');
+      await AsyncStorage.removeItem('DATE_TIME');
+      
+      this.setState({
+        event: "",
+        totalDuration: 0,
+        expirydate: ""
+      })
+
+      return true;
+    }
+    catch(exception) {
+      return false;
+    }
+  }
+
   render() {
     const {navigate} = this.props.navigation;
+    console.disableYellowBox = true; 
     return (
       <View >
             <StatusBar hidden={true}/>
@@ -75,7 +133,8 @@ export default class Home extends Component {
                 <TouchableOpacity
                     onPress={() => navigate('EditTime', {
                       setExpiryDate: this._setExpiryDate.bind(this),
-                      time: this.state.expirydate
+                      time: this.state.expirydate,
+                      event: this.state.event
                     })}
                     style={{width: 30, height: 30, marginTop:20,marginRight:20, position: 'absolute', right:0}}>
                     <Image
@@ -90,12 +149,17 @@ export default class Home extends Component {
                     size = {25}
                     digitStyle = {styles.digit}
                     timeLabelStyle = {styles.timeLable} 
-                    onPress={() => alert('Countdown to 2020:01:01 00:00:00')}
                     digitTxtStyle = {styles.digitTxt} />
 
-                <Text style={styles.text2020}>2020</Text>
-
-                <Text style={{marginTop:10, marginBottom: 50,color: 'white', fontSize: 20,textAlign:'center'}}>🌸 happy new year 🌸</Text>
+                <TouchableOpacity
+                    onPress={() => {this.removeItemValue()}}
+                    style={{width: 40, height: 40, alignSelf:'center', marginTop: 30}}>
+                    <Image
+                    style={{width: 40, height: 40}}
+                    source={require('./../../images/ic_reset.png')} />
+                </TouchableOpacity >
+                
+                <Text style={{marginTop:30, marginBottom: 50,color: 'white', fontSize: 20,textAlign:'center'}}>{this.state.event}</Text>
                 </View>
             </ImageBackground>
       </View>
