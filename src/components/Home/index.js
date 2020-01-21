@@ -6,11 +6,14 @@ import {
   StatusBar,
   ImageBackground,
   Image,
-  TouchableOpacity
+  TouchableOpacity,
+  Modal,
+  TouchableHighlight
 } from 'react-native';
 import CountDown from 'react-native-countdown-component';
 import moment from 'moment';
 import AsyncStorage from '@react-native-community/async-storage';
+import Dialog, { DialogFooter, DialogButton, DialogContent } from 'react-native-popup-dialog';
 
 export default class Home extends Component {
   static navigationOptions = {
@@ -23,6 +26,7 @@ export default class Home extends Component {
         totalDuration: 0,
         expirydate: "",
         event: "",
+        modalVisible: false,
       };
    
     }
@@ -119,7 +123,11 @@ export default class Home extends Component {
       return false;
     }
   }
-
+  
+  setModalVisible(visible) {
+    this.setState({modalVisible: visible});
+  }
+  
   render() {
     const {navigate} = this.props.navigation;
     console.disableYellowBox = true; 
@@ -148,11 +156,13 @@ export default class Home extends Component {
                     until = {this.state.totalDuration}
                     size = {25}
                     digitStyle = {styles.digit}
+                    onFinish={() => {
+                      this.removeItemValue()}}
                     timeLabelStyle = {styles.timeLable} 
                     digitTxtStyle = {styles.digitTxt} />
 
                 <TouchableOpacity
-                    onPress={() => {this.removeItemValue()}}
+                    onPress={() => {this.setModalVisible(true)}}
                     style={{width: 40, height: 40, alignSelf:'center', marginTop: 30}}>
                     <Image
                     style={{width: 40, height: 40}}
@@ -161,6 +171,26 @@ export default class Home extends Component {
                 
                 <Text style={{marginTop:30, marginBottom: 50,color: 'white', fontSize: 20,textAlign:'center'}}>{this.state.event}</Text>
                 </View>
+                <Dialog
+                  visible={this.state.modalVisible}
+                  footer={
+                    <DialogFooter>
+                      <DialogButton
+                        text="CANCEL"
+                        onPress={() => {this.setModalVisible(false)}}
+                      />
+                      <DialogButton
+                        text="OK"
+                        onPress={() => {this.removeItemValue(), this.setModalVisible(false)}}
+                      />
+                    </DialogFooter>
+                  }
+                >
+                  <DialogContent
+                  style = {{width: 250, height: 100, padding: 20}}>
+                    <Text>Do you want to reset Countdown? {this.state.expirydate}</Text>
+                  </DialogContent>
+                </Dialog>
             </ImageBackground>
       </View>
     );

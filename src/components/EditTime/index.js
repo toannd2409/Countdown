@@ -28,10 +28,7 @@ export default class EditTime extends Component {
     }
   }
   static navigationOptions = {
-    title: 'Change countdown timer',
-    headerStyle: {
-      height: 54
-    }
+    title: 'Change countdown timer'
   };
   
   componentDidMount(){
@@ -106,7 +103,20 @@ export default class EditTime extends Component {
       <ScrollView style={{backgroundColor: 'white', height: '100%'}}>
         <View style={{ flex: 1, padding:10, backgroundColor: 'white'}}>
         <StatusBar hidden={true}/>
-          <Text style={styles.textTitle}>Countdown timer</Text>
+          <Text style={styles.textTitle}>COUNTDOWN TITLE</Text>
+          <View style={styles.subContainer}>
+            <TextInput 
+            style={styles.textInputEvent}
+            flat = 'outlined'
+            placeholder = 'Event name...'
+            onChangeText={(text) => this.setState({event: text})}
+            value={this.state.event}
+            />
+          </View>
+
+          <View style={{height:1, backgroundColor: '#d8d8d8', margin: 10, marginTop: 30}}/>
+          
+          <Text style={styles.textTitle}>COUNTDOWN TIMER</Text>
           <View style={styles.subContainer}>
             <DatePicker
             style={styles.datePicker}
@@ -175,16 +185,6 @@ export default class EditTime extends Component {
             </View>
           </View>
 
-          <View style={{height:1, backgroundColor: '#bababa', margin: 10}}/>
-          <Text style={styles.textTitle}>Countdown title</Text>
-          <View style={styles.subContainer}>
-            <TextInput 
-            style={styles.textInputEvent}
-            placeholder = 'Event name...'
-            onChangeText={(text) => this.setState({event: text})}
-            value={this.state.event}
-            />
-          </View>
           <TouchableOpacity
             style={styles.button}
             onPress = {() => this.goBack()}>
@@ -209,10 +209,10 @@ const styles =  StyleSheet.create({
     marginTop: 50
   },
   textTitle: {
-    fontSize: 16,
+    fontSize: 14,
     margin: 10,
     marginBottom: 20,
-    color: '#969696',
+    color: '#667484',
   },
   subContainer: {
     paddingStart: 10,
@@ -241,7 +241,7 @@ const styles =  StyleSheet.create({
     width: '100%',
     borderWidth: 1,
     borderRadius: 8,
-    borderColor: 'gray',
+    borderColor: '#cecece',
     padding: 5,
     paddingStart: 10
   }
