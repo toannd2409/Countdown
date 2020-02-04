@@ -14,10 +14,11 @@ import CountDown from 'react-native-countdown-component';
 import moment from 'moment';
 import AsyncStorage from '@react-native-community/async-storage';
 import Dialog, { DialogFooter, DialogButton, DialogContent } from 'react-native-popup-dialog';
+import LinearGradient from 'react-native-linear-gradient';
 
 export default class Home extends Component {
   static navigationOptions = {
-    header: null,
+    headerShown: false,
     };
     constructor(props) {
       super(props);
@@ -27,6 +28,7 @@ export default class Home extends Component {
         expirydate: "",
         event: "",
         modalVisible: false,
+        gradient1: ['#ff8177', '#ff867a', '#f99185', '#cf556c', '#b12a5b']
       };
    
     }
@@ -92,6 +94,7 @@ export default class Home extends Component {
     try {
       const eventValue = await AsyncStorage.getItem('EVENT');
       const dateValue = await AsyncStorage.getItem('DATE_TIME');
+      const colorGradient = await AsyncStorage.getItem('COLOR_GRADIENT');
 
       if(dateValue != null){
         this.setState({expirydate: dateValue})
@@ -100,6 +103,9 @@ export default class Home extends Component {
 
       if(eventValue != null)
       this.setState({event: eventValue})
+
+      if(colorGradient != null)
+      this.setState({gradient1: colorGradient})
 
     } catch (error) {
       // Error retrieving data
@@ -134,7 +140,8 @@ export default class Home extends Component {
     return (
       <View >
             <StatusBar hidden={true}/>
-            <ImageBackground  
+            <LinearGradient  
+            colors={this.state.gradient1}
             source={{uri: 'https://s1.1zoom.me/b7866/985/Christmas_Snowflakes_Red_background_Template_573816_1080x1920.jpg'}}
              style={styles.container}>
              <View style={{flex:1, width:'100%'}}>
@@ -150,7 +157,7 @@ export default class Home extends Component {
                     source={require('./../../images/ic_edit.png')} />
                 </TouchableOpacity >
 
-                <Text style={{marginTop:50, marginBottom: 50,color: 'white', fontSize: 20, textAlign:'center'}}>Countdown</Text>
+                <Text style={{marginTop:120, marginBottom: 50,color: 'white', fontSize: 20, textAlign:'center'}}>Countdown</Text>
 
                 <CountDown 
                     until = {this.state.totalDuration}
@@ -169,7 +176,7 @@ export default class Home extends Component {
                     source={require('./../../images/ic_reset.png')} />
                 </TouchableOpacity >
                 
-                <Text style={{marginTop:30, marginBottom: 50,color: 'white', fontSize: 20,textAlign:'center'}}>{this.state.event}</Text>
+                <Text style={{margin: 30,color: 'white', fontSize: 20,textAlign:'center'}}>{this.state.event}</Text>
                 </View>
                 <Dialog
                   visible={this.state.modalVisible}
@@ -191,7 +198,7 @@ export default class Home extends Component {
                     <Text>Do you want to reset Countdown? {this.state.expirydate}</Text>
                   </DialogContent>
                 </Dialog>
-            </ImageBackground>
+            </LinearGradient>
       </View>
     );
   }
@@ -212,16 +219,15 @@ const styles = StyleSheet.create({
   },
   digit: {
       backgroundColor: '#FFF',
-      borderRadius: 50,
+      borderRadius: 100,
       marginHorizontal: 4,
-      borderWidth: 1  ,
-      borderColor:'#f23c4b',
       opacity: 1,
       alignItems: 'center',
       justifyContent: 'center',
   },
   digitTxt: {
-      color: '#CB2938'
+      color: '#000',
+      opacity: 0.5
   },
   timeLable: {
       color: "#FFF",
