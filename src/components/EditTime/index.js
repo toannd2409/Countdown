@@ -15,7 +15,6 @@ import moment from 'moment';
 import AsyncStorage from '@react-native-community/async-storage';
 import { CustomPicker } from 'react-native-custom-picker';
 import LinearGradient from 'react-native-linear-gradient';
-import { Colors } from 'react-native/Libraries/NewAppScreen';
 
 export default class EditTime extends Component {
 
@@ -39,16 +38,39 @@ export default class EditTime extends Component {
   
   componentDidMount(){
     this.getTime()
-    this.getTimePicker()    
+    this.getTimePicker()
+    this._getBackground()    
+  }
+
+  _getBackground = async () => {
+    try {
+    let colorGradient = ''
+    let colorName = ''
+    colorGradient = await AsyncStorage.getItem('COLOR_GRADIENT');
+    colorName = await AsyncStorage.getItem('COLOR_NAME');
+
+    if(colorGradient != null)
+      this.setState({colorGradient: JSON.parse(colorGradient)})
+    
+    if(colorName != null)
+      this.setState({colorName: colorName})
+    } catch (error) {
+      
+    }
   }
 
   goBack = () => {
-    let expriDate = this.state.date + " " + this.state.selectHour + ":" +  this.state.selectMinute + ":" + this.state.selectSecond
-    this.props.navigation.state.params.setExpiryDate(expriDate, this.state.event)
-    this._saveKey("EVENT", this.state.event)
+    const { date,event, selectHour, selectMinute, selectSecond, colorGradient, colorName} = this.state;
+    const {setExpiryDate, setBackground} = this.props.navigation.state.params
+    let expriDate = date + " " + selectHour + ":" + selectMinute + ":" + selectSecond
+    setExpiryDate(expriDate, event)
+    setBackground(colorGradient)
+    
+    this._saveKey("EVENT", event)
     this._saveKey("DATE_TIME", expriDate)
-    this._saveKey("COLOR_GRADIENT", this.state.colorGradient)
-    this._saveKey("COLOR_NAME", this.state.colorName)
+    this._saveKeyArray("COLOR_GRADIENT", colorGradient)
+    this._saveKey("COLOR_NAME", colorName)
+    
     this.props.navigation.goBack()
   }
 
@@ -103,6 +125,14 @@ export default class EditTime extends Component {
       // Error saving data
     }
   }
+  _saveKeyArray = async (key, value) => {
+    try {
+      await AsyncStorage.setItem(key,  JSON.stringify(value))
+    } catch (error) {
+      
+    }
+  }
+
 
   changeBackground(color, label){
     let colorGradient = []
@@ -116,7 +146,7 @@ export default class EditTime extends Component {
 
   render() {
     const options = [
-
+      {color: ['#000', '#000'], label: 'No background', value: 0},
       {color: ['#ff9a9e', '#fad0c4'], label: 'Warm Flame', value: 1},
       {color: ['#a18cd1', '#fbc2eb'], label: 'Night Fade', value: 2},
       {color: ['#fad0c4', '#ffd1ff'], label: 'Spring Warmth', value: 3},
@@ -255,17 +285,18 @@ export default class EditTime extends Component {
                 style = {{width: 30, height: 30, marginEnd: 15}}
                 colors = {this.state.colorGradient}
               />
-              <Text>{this.state.colorName}</Text>
+              
+              <CustomPicker
+                placeholder={'Please select your favorite background...'}
+                options={options}
+                getLabel={item => item.label}
+                fieldTemplate={this.renderField}
+                optionTemplate={this.renderOption}
+                onValueChange={value => {
+                  this.changeBackground(value.color, value.label)
+                }}
+              />
             </View>
-          <CustomPicker
-            placeholder={'Please select your favorite background...'}
-            options={options}
-            getLabel={item => item.label}
-            optionTemplate={this.renderOption}
-            onValueChange={value => {
-              this.changeBackground(value.color, value.label)
-            }}
-          />
           </View>
 
           <TouchableOpacity
@@ -284,6 +315,23 @@ export default class EditTime extends Component {
         <View style={{flex: 1, flexDirection: 'row', padding: 10}}>
           <LinearGradient style={[styles.box], {width: 30, height: 30, marginEnd: 10}} colors={item.color} />
           <Text style={{ color: item.color, alignSelf: 'flex-start' }}>{getLabel(item)}</Text>
+        </View>
+      </View>
+    )
+  }
+  renderField(settings) {
+    const { selectedItem, defaultText, getLabel, clear } = settings
+    return (
+      <View style={styles.container}>
+        <View>
+          {!selectedItem && <Text style={[styles.text, { color: 'grey' }]}>{defaultText}</Text>}
+          {selectedItem && (
+            <View style={styles.innerContainer}>
+              <Text style={[styles.text, { color: selectedItem.color }]}>
+                {getLabel(selectedItem)}
+              </Text>
+            </View>
+          )}
         </View>
       </View>
     )

@@ -8,13 +8,14 @@ import {
   Image,
   TouchableOpacity,
   Modal,
-  TouchableHighlight
+  TouchableHighlight,
 } from 'react-native';
 import CountDown from 'react-native-countdown-component';
 import moment from 'moment';
 import AsyncStorage from '@react-native-community/async-storage';
 import Dialog, { DialogFooter, DialogButton, DialogContent } from 'react-native-popup-dialog';
 import LinearGradient from 'react-native-linear-gradient';
+import { ScrollView } from 'react-native-gesture-handler';
 
 export default class Home extends Component {
   static navigationOptions = {
@@ -28,7 +29,7 @@ export default class Home extends Component {
         expirydate: "",
         event: "",
         modalVisible: false,
-        gradient1: ['#ff8177', '#ff867a', '#f99185', '#cf556c', '#b12a5b']
+        gradient1: ['#000', '#000']
       };
    
     }
@@ -42,6 +43,10 @@ export default class Home extends Component {
     this.setState({expirydate:expirydate})
     this.setState({event:event})
     this.setTime(expirydate)
+  }
+
+  _setBackground(color){
+    this.setState({gradient1: color})
   }
 
   setTimeNewYear = () => {
@@ -92,9 +97,10 @@ export default class Home extends Component {
 
   _getValueKey = async () => {
     try {
+      let colorGradient = ''
       const eventValue = await AsyncStorage.getItem('EVENT');
       const dateValue = await AsyncStorage.getItem('DATE_TIME');
-      const colorGradient = await AsyncStorage.getItem('COLOR_GRADIENT');
+      colorGradient = await AsyncStorage.getItem('COLOR_GRADIENT');
 
       if(dateValue != null){
         this.setState({expirydate: dateValue})
@@ -102,11 +108,12 @@ export default class Home extends Component {
       }
 
       if(eventValue != null)
-      this.setState({event: eventValue})
+        this.setState({event: eventValue})
 
       if(colorGradient != null)
-      this.setState({gradient1: colorGradient})
+        this.setState({gradient1: JSON.parse(colorGradient)})
 
+      console.warn('gradient:' + colorGradient)
     } catch (error) {
       // Error retrieving data
     }
@@ -142,41 +149,38 @@ export default class Home extends Component {
             <StatusBar hidden={true}/>
             <LinearGradient  
             colors={this.state.gradient1}
-            source={{uri: 'https://s1.1zoom.me/b7866/985/Christmas_Snowflakes_Red_background_Template_573816_1080x1920.jpg'}}
              style={styles.container}>
              <View style={{flex:1, width:'100%'}}>
                 <TouchableOpacity
                     onPress={() => navigate('EditTime', {
                       setExpiryDate: this._setExpiryDate.bind(this),
+                      setBackground: this._setBackground.bind(this),
                       time: this.state.expirydate,
                       event: this.state.event
                     })}
                     style={{width: 30, height: 30, marginTop:20,marginRight:20, position: 'absolute', right:0}}>
                     <Image
-                    style={{width: 30, height: 30,  position: 'absolute', right:0}}
+                    style={{width: 30, height: 30}}
                     source={require('./../../images/ic_edit.png')} />
                 </TouchableOpacity >
 
-                <Text style={{marginTop:120, marginBottom: 50,color: 'white', fontSize: 20, textAlign:'center'}}>Countdown</Text>
-
-                <CountDown 
-                    until = {this.state.totalDuration}
-                    size = {25}
-                    digitStyle = {styles.digit}
-                    onFinish={() => {
-                      this.removeItemValue()}}
-                    timeLabelStyle = {styles.timeLable} 
-                    digitTxtStyle = {styles.digitTxt} />
-
+                <Text style={styles.textCountdown}>Countdown</Text>
+                <View style={{backgroundColor: 'rgba(0, 0, 0,0.3)', marginStart: 30, marginEnd: 30, padding:40, borderRadius: 15}}>
+                  <CountDown 
+                      until = {this.state.totalDuration}
+                      size = {25}
+                      digitStyle = {styles.digit}
+                      onFinish={() => {
+                        this.removeItemValue()}}
+                      timeLabelStyle = {styles.timeLable} 
+                      digitTxtStyle = {styles.digitTxt} />
+              </View>
+                <Text style={styles.txtEvent}>{this.state.event}</Text>
                 <TouchableOpacity
                     onPress={() => {this.setModalVisible(true)}}
-                    style={{width: 40, height: 40, alignSelf:'center', marginTop: 30}}>
-                    <Image
-                    style={{width: 40, height: 40}}
-                    source={require('./../../images/ic_reset.png')} />
+                    style={{ alignSelf:'center', margin: 30, flexDirection: 'row', backgroundColor: 'rgba(0, 0, 0,0.3)', paddingStart: 30, paddingEnd: 30, padding: 10, borderRadius: 30, borderWidth:1, borderColor: '#fff'}}>
+                      <Text style={{alignSelf:'center', fontSize: 16, color:'#fff'}}>Reset</Text>
                 </TouchableOpacity >
-                
-                <Text style={{margin: 30,color: 'white', fontSize: 20,textAlign:'center'}}>{this.state.event}</Text>
                 </View>
                 <Dialog
                   visible={this.state.modalVisible}
@@ -210,24 +214,24 @@ const styles = StyleSheet.create({
       height:'100%',
       alignItems: 'center',
   },
-  text2020: {
-      fontSize:50,
-      color: '#FFF',
-      marginTop: 15,
-      textShadowColor: 'yellow',
-      textAlign:'center'
+  textCountdown: {
+    marginTop:25, 
+    marginBottom: 80,
+    color: 'white', 
+    fontSize: 20, 
+    textAlign:'center',
   },
   digit: {
-      backgroundColor: '#FFF',
-      borderRadius: 100,
-      marginHorizontal: 4,
-      opacity: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255,0)',
+    borderRadius: 100,
+    borderColor: '#FFF',
+    borderWidth: 2,
+    marginHorizontal: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   digitTxt: {
-      color: '#000',
-      opacity: 0.5
+      color: '#FFF',
   },
   timeLable: {
       color: "#FFF",
@@ -238,10 +242,10 @@ const styles = StyleSheet.create({
       margin: 20,
       textShadowColor: 'yellow'
   },
-  txtNewYear: {
-      fontSize:40,
-      color: '#6746E7',
-      margin: 20,
-      textShadowColor: 'yellow'
-  },
+  txtEvent: {
+    margin: 30,
+    color: 'white', 
+    fontSize: 18,
+    textAlign:'center'
+  }
 });
