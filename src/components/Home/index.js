@@ -29,7 +29,7 @@ export default class Home extends Component {
         expirydate: "",
         event: "",
         modalVisible: false,
-        gradient1: ['#000', '#000']
+        gradient1: ['#f43b47', '#453a94']
       };
    
     }
@@ -176,6 +176,7 @@ export default class Home extends Component {
                       digitTxtStyle = {styles.digitTxt} />
               </View>
                 <Text style={styles.txtEvent}>{this.state.event}</Text>
+                <Text style={{position: 'absolute', bottom:8, color: 'white', alignSelf:'center', fontSize: 8}}>Develop by ToanND</Text>
                 <TouchableOpacity
                     onPress={() => {this.setModalVisible(true)}}
                     style={{ alignSelf:'center', margin: 30, flexDirection: 'row', backgroundColor: 'rgba(0, 0, 0,0.3)', paddingStart: 30, paddingEnd: 30, padding: 10, borderRadius: 30, borderWidth:1, borderColor: '#fff'}}>
@@ -219,7 +220,7 @@ const styles = StyleSheet.create({
     marginBottom: 80,
     color: 'white', 
     fontSize: 20, 
-    textAlign:'center',
+    alignSelf:'center',
   },
   digit: {
     backgroundColor: 'rgba(255, 255, 255,0)',
